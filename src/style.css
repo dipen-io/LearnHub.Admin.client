@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+/* Light theme variables */
+:root {
+  --bg: #F2F3F4;
+  --text: #000000;
+  --primary: #007BFF;
+}
+
+/* Dark theme variables triggered by data-theme attribute */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+[data-theme="dark"] {
+  --bg: #1F1A24;
+  --text: #ffffff;
+  --primary: #1F1A24;
+}
+
+/* Utility classes */
+.bg-theme {
+  background-color: var(--bg);
+  transition: background-color 0.3s ease-in-out;
+}
+.text-theme {
+  color: var(--text);
+  transition: color 0.3s ease-in-out;
+}
+.btn-theme {
+  background-color: var(--primary);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+}
+
+/* View Transition Animations */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* ANGLE */
+[data-style='angled']::view-transition-old(root) {
+  animation: none;
+  z-index: -1;
+}
+
+[data-style='angled']::view-transition-new(root) {
+  animation: unclip 1s;
+  clip-path: polygon(-100vmax 100%, 100% 100%, 100% -100vmax);
+}
+
+@keyframes unclip {
+  0% {
+    clip-path: polygon(100% 100%, 100% 100%, 100% 100%);
+  }
+}
+
+
+/* VERTICAL */
+[data-style='vertical']::view-transition-old(root) {
+  animation: wipe-old 0.8s forwards;
+  z-index: -1;
+}
+
+[data-style='vertical']::view-transition-new(root) {
+  animation: wipe-new 0.8s forwards;
+}
+
+@keyframes wipe-old {
+  from {
+    clip-path: inset(0 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 100% 0);
+  }
+}
+
+@keyframes wipe-new {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* FLIP */
+[data-style='flip']::view-transition-old(root) {
+  animation: flip-old 0.6s forwards;
+  transform-origin: center center;
+  backface-visibility: hidden;
+  z-index: -1;
+}
+
+[data-style='flip']::view-transition-new(root) {
+  animation: flip-new 0.6s forwards;
+  transform-origin: center center;
+  backface-visibility: hidden;
+}
+
+@keyframes flip-old {
+  from {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: rotateY(90deg);
+    opacity: 0;
+  }
+}
+
+@keyframes flip-new {
+  from {
+    transform: rotateY(-90deg);
+    opacity: 0;
+  }
+  to {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+/* SIDE LEFT */
+[data-style='slides']::view-transition-old(root) {
+  animation: slide-old 0.7s forwards;
+  z-index: -1;
+}
+
+[data-style='slides']::view-transition-new(root) {
+  animation: slide-new 0.7s forwards;
+}
+
+@keyframes slide-old {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes slide-new {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
