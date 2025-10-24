@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import ToggleTheme from "../hooks/toggleTheme";
-import { House, User, Play, X } from "lucide-react";
+import { House, User, Play, X, LogIn } from "lucide-react";
 
 const SidebarComponent = ({ visible = true, onClose }) => {
   return (
@@ -63,6 +63,17 @@ const SidebarComponent = ({ visible = true, onClose }) => {
         >
           <Play />
           Course
+        </NavLink>
+        <NavLink
+          to="/login"
+          className={({ isActive }) =>
+            `flex gap-3 px-5 py-2 transition ${
+              isActive ? "bg-amber-100 font-semibold" : "hover:bg-amber-100"
+            }`
+          }
+        >
+          <LogIn />
+         Login
         </NavLink>
       </nav>
 

@@ -5,6 +5,7 @@ import SidebarComponent from "./components/Sidebar";
 import CoursePage from "./pages/Course";
 import { useState } from "react";
 import { TextAlignJustify } from "lucide-react";
+import LoginPage from "./pages/Login";
 
 function App() {
   const [showSidebar, setShowSidber] = useState(true);
@@ -29,6 +30,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/Instructor" element={<InstructorPage />} />
         <Route path="/Course" element={<CoursePage />} />
+        <Route path="/Login" element={<LoginPage />} />
       </Routes>
      </div>
     </Router>
