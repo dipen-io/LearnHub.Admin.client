@@ -65,16 +65,17 @@ const InstructorPage = () => {
   };
   const handlePageClick = (pageNumber) => setCurrentPage(pageNumber);
 
-  // ✅ Request page condition — this part is fine
-
   useEffect(() => {
+     if (showRequestPage) {
+        setIsOpen(false);
+      }
     if (selected === "instructors" && instructorsData) {
       setDisplayData(instructorsData.map(normalizeInstructorData));
     } else if (selected === "users") {
       setDisplayData(users.map(normalizeUserData));
     }
     setCurrentPage(1);
-  }, [selected, instructorsData]);
+  }, [selected, instructorsData,showRequestPage]);
 
   if (showRequestPage) {
     return (

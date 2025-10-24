@@ -26,10 +26,7 @@ export const AcceptRequest = async(id) => {
     return data;
 }
 
-export const getInstructors = async(id) => {
-    console.log("INSIDE API BEFORE");
+export const getInstructors = async() => {
     const { data } = await axiosInstance.get(`admin/instructor`);
-    console.log("OUTSIDE API AFTER");
-
     return data.data;
 }

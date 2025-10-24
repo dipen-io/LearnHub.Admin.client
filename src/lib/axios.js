@@ -21,11 +21,9 @@ axiosInstance.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
-        console.log("CONFIG", config);
         return config;
     },
     (error) => {
-        console.log("ERRO FROM AXIOS", error)
         return Promise.reject(error);
     }
 )
@@ -45,7 +43,6 @@ const processQueue = (error, token = null) => {
 axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
-        console.log("GOING INSIDE INTERCEPTOR")
         const originalRequest = error.config;
         const authStore = useAuthStore.getState();
 
@@ -77,7 +74,6 @@ axiosInstance.interceptors.response.use(
             catch (refreshError) {
                 processQueue(refreshError, null);
                 isRefreshing = false;
-                console.log("refreshError", refreshError);
                 // Logout if refresh fails
                 authStore.logout();
                 window.location.href = "/login";
