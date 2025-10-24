@@ -26,7 +26,40 @@ export const AcceptRequest = async(id) => {
     return data;
 }
 
-export const getInstructors = async() => {
-    const { data } = await axiosInstance.get(`admin/instructor`);
-    return data.data;
+export const getInstructors = async(params = {}) => {
+    const {search = "", page = 1, limit = 30,} = params;
+    // Build query string dynamically
+    const query =  new URLSearchParams({
+        search,
+        page: String(page),
+        limit: String(limit),
+    });
+    // const { data } = await axiosInstance.get(`admin/instructor`);
+    const { data } = await axiosInstance.get(`admin/instructor?${query.toString()}`);
+    return data;
+}
+
+export const getUsers = async(params) => {
+    const {search = "", page = 1, limit = 30, type = "users"} = params;
+    // Build query string dynamically
+    const query =  new URLSearchParams({
+        search,
+        page: String(page),
+        limit: String(limit),
+        type,
+    });
+    const { data } = await axiosInstance.get(`users?${query.toString()}`);
+    return data;
+}
+
+export const getStudents = async(params = {}) => {
+    const {search = "", page = 1, limit = 30,} = params;
+    // Build query string dynamically
+    const query =  new URLSearchParams({
+        search,
+        page: String(page),
+        limit: String(limit),
+    });
+    const { data } = await axiosInstance.get(`users?${query.toString()}`);
+    return data;
 }
