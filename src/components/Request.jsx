@@ -1,88 +1,128 @@
-import { useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { X, Check } from "lucide-react"
+import { X, Check } from "lucide-react";
 import { GetRequest, AcceptRequest } from "../service/user";
-import { useState, useEffect } from "react";
 
 const RequestList = () => {
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-
-  const { mutate, isLoading, data, isError, error } = useMutation({
-    mutationFn: GetRequest,
-    onSuccess: (response) => {
-      // toast.success(response.message);
-    },
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["requests"],
+    queryFn: GetRequest,
     onError: (error) => {
       if (!error.response) {
         toast.error("Network error. Please try again later.");
         return;
       }
-
-      //ERROR HERE
       const err = error?.response?.data?.error;
-      console.log("ERR ERR : ", err);
-      if (err?.statusCode === 404) {
-        setEmailError(err.message);
-      }
-      if (err?.statusCode === 401) {
-        setPasswordError(err.message);
-      }
-      // toast.error(err?.message || "Request fetching failed");
+      toast.error(err?.message || "Failed to fetch requests");
     },
   });
 
-  useEffect(() => {
-    mutate(); // Trigger the mutation when the component mounts
-  }, [mutate]);
+  const handleAccept = async (id) => {
+    try {
+      const response = await AcceptRequest({id, status: "accept"});
+      if (response.success) {
+        toast.success(response.message);
+        refetch();
+      } else {
+        toast.error("Failed to accept request");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      const response = await AcceptRequest({id, status: "reject"});
+      if (response.success) {
+        toast.success(response.message);
+        refetch();
+      } else {
+        toast.error("Failed to accept request");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong");
+    }
+  };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500"></div>
+      </div>
+    );
   }
 
-    const handleReject = () => {
-        alert("Reject")
-    }
-
-    const handleAccept = async(id) => {
-        const response = await AcceptRequest(id)
-        if (response.success){
-            toast.success(response.message);
-        } else {
-            console.error("response error");
-        }
-    }
+  if (isError) {
+    return (
+      <div className="text-center text-red-500 font-semibold py-10">
+        Failed to load requests. Please try again.
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <div className="relative  hover:shadow-2xl px-3 py-3 grid-cols-5 w-1/4 rounded">
+    <div className="max-w-4xl mx-auto p-6">
+      <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
+        Instructor Requests
+      </h2>
+
       {data && data.length > 0 ? (
-        <ul>
-          {data.map((request, index) => (
-                            <>
-            <li key={index}>
-              <p>Channel Name : {request.channelName}</p>
-              <p> full Name : {request.user.fullName}</p>
-              <p> Email : {request.user.email || request.user.phoneNumber}</p>
-              <p>User Role : {request.user.role}</p>
+        <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {data.map((request) => (
+            <li
+              key={request.id}
+              className="bg-white shadow-md hover:shadow-lg transition-all duration-300 rounded-lg p-5 border border-gray-200 flex flex-col justify-between"
+            >
+              <div className="space-y-1 text-gray-700">
+                <p>
+                  <span className="font-medium">Channel Name:</span>{" "}
+                  {request.channelName}
+                </p>
+                <p>
+                  <span className="font-medium">Full Name:</span>{" "}
+                  {request.user.fullName}
+                </p>
+                <p>
+                  <span className="font-medium">Email / Phone:</span>{" "}
+                  {request.user.email || request.user.phoneNumber}
+                </p>
+                <p>
+                  <span className="font-medium">Role:</span>{" "}
+                  {request.user.role}
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-4">
+                <button
+                  onClick={() => handleAccept(request.id)}
+                  className="flex items-center gap-1 bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-600 transition-colors"
+                >
+                  <Check size={18} /> Accept
+                </button>
+                <button
+                  onClick={() => handleReject(request.id)}
+                  className="flex items-center gap-1 bg-red-500 text-white px-3 py-2 rounded-md hover:bg-red-600 transition-colors"
+                >
+                  <X size={18} /> Reject
+                </button>
+              </div>
             </li>
-
-              <div className="absolute right-5 top-2 space-y-4 justify-center mt-2 cursor-pointer">
-                <Check size={35} className="bg-green-500 text-white rounded hover:bg-green-400"
-
-                    onClick={() => handleAccept(request.id)}
-                            />
-               <X size={35} className="bg-red-500 text-white rounded hover:bg-red-400"
-                                onClick={() => handleReject()}
-                            />
-             </div>
-           </>
           ))}
         </ul>
       ) : (
-        <div>No requests found</div>
+        <div className="text-center text-gray-500 py-10">
+          No requests found.
+        </div>
       )}
-      </div>
     </div>
   );
 };

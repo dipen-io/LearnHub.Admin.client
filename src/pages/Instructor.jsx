@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery,  useMutation, useQueryClient } from "@tanstack/react-query";
 import { MessageCircleWarning, MoveLeft, Ban, CircleCheckBig } from "lucide-react";
 import RequestList from "../components/Request";
-import { getInstructors, getUsers, updateUserStatus } from "../service/user";
+import { deleteUserParmanently, getInstructors, getUsers, updateUserStatus } from "../service/user";
 import Loader from "../components/Loading";
 import toast from "react-hot-toast";
 
@@ -82,6 +82,29 @@ const InstructorPage = () => {
      },
    });
 
+  // DELETE USER
+   const { mutate: mutateUserDelete, isPending: isDeleting } = useMutation({
+     mutationFn: deleteUserParmanently,
+     onSuccess: (data) => {
+       console.log("✅ DELETING RESPONSE:", data);
+
+        if(data.success){
+            toast.success(data.message)
+        } else if (data?.response?.statusCode === 404) {
+           toast.error(data.message)
+        }
+       // Refetch user/instructor list after update
+       queryClient.invalidateQueries(["users"]);
+       queryClient.invalidateQueries(["instructors"]);
+       queryClient.refetchQueries(["users"]);
+       queryClient.refetchQueries(["instructors"]);
+     },
+     onError: (error) => {
+       toast.error(error.response.data.error.message);
+       console.error("❌ Error Deleting user:", error);
+     },
+   });
+
   const handleRequestClick = () => setShowRequestPage(true);
   const handleBackToUsers = () => setShowRequestPage(false);
 
@@ -107,12 +130,20 @@ const InstructorPage = () => {
   const handlePageClick = (pageNumber) => setCurrentPage(pageNumber);
 
   {/*  |____EDIT____|  */}
-  const HandleDelete  = (userId) => {
-        console.log("Delete", userId);
-  }
+  {/* DELTE USERS  */}
+const HandleDelete  = (userId) => {
+    mutateUserDelete({ userId: userId },
+        {
+            onSuccess: () => {
+                setIsEditId(null);
+            }
+        }
+    )
+}
 
+  {/* UPDATE STATUS  */}
   const HandleStatus = (user) => {
-        const newStatus = user.status ===true ? "inactive" : "active";
+        const newStatus = user.status === true ? "inactive" : "active";
         mutateUserStatus(
             {status: newStatus, userId: user.id},
             {

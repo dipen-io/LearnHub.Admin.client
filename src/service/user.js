@@ -18,11 +18,15 @@ export const GetRequest = async() => {
     return data.data;
 }
 
-//Accepnt Request
+// accepet | reject Request in Query
 // @param: instructorID
 // token in header
-export const AcceptRequest = async(id) => {
-    const { data } = await axiosInstance.patch(`admin/approve-instructor/${id}`);
+export const AcceptRequest = async(params) => {
+    const { status, id } = params;
+    const query = new URLSearchParams ({
+        status
+    });
+    const { data } = await axiosInstance.patch(`admin/approve-instructor/${id}?${query.toString()}`);
     return data;
 }
 
@@ -65,6 +69,7 @@ export const getStudents = async(params = {}) => {
     return data;
 }
 
+// UPDATE STATUS
 export const updateUserStatus = async(params) => {
     const {status, userId } = params;
     // Build query string dynamically
@@ -73,5 +78,15 @@ export const updateUserStatus = async(params) => {
         userId: String(userId),
     });
     const { data } = await axiosInstance.patch(`admin/user/status?${query.toString()}`);
+    return data;
+}
+
+// DELETE USER
+export const deleteUserParmanently = async(params) => {
+    const { userId } = params;
+    const query =  new URLSearchParams({
+        userId: String(userId),
+    });
+    const { data } = await axiosInstance.delete(`admin/user/delete?${query.toString()}`);
     return data;
 }
