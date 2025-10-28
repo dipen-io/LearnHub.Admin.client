@@ -40,13 +40,14 @@ export const getInstructors = async(params = {}) => {
 }
 
 export const getUsers = async(params) => {
-    const {search = "", page = 1, limit = 30, type = "users"} = params;
+    const {search = "", page = 1, limit = 30, type = "users", status} = params;
     // Build query string dynamically
     const query =  new URLSearchParams({
         search,
         page: String(page),
         limit: String(limit),
         type,
+        status
     });
     const { data } = await axiosInstance.get(`users?${query.toString()}`);
     return data;
@@ -71,8 +72,6 @@ export const updateUserStatus = async(params) => {
         status: String(status),
         userId: String(userId),
     });
-    const { data } = await axiosInstance.patch(`admin/users/status?${query.toString()}`);
+    const { data } = await axiosInstance.patch(`admin/user/status?${query.toString()}`);
     return data;
 }
-
-// PATCH admin/user/status?status=active&userId=42

@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect, useRef } from "react";
+import { useQuery,  useMutation, useQueryClient } from "@tanstack/react-query";
 import { MessageCircleWarning, MoveLeft, Ban, CircleCheckBig } from "lucide-react";
 import RequestList from "../components/Request";
-import { getInstructors, getUsers } from "../service/user";
+import { getInstructors, getUsers, updateUserStatus } from "../service/user";
 import Loader from "../components/Loading";
+import toast from "react-hot-toast";
 
 const normalizeUserData = (user) => ({
   id: user.id,
@@ -28,8 +29,12 @@ const InstructorPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showRequestPage, setShowRequestPage] = useState(false);
   const [isOpenDetils, setIsOpenDetails] = useState(false);
+  const [isEditId, setIsEditId] = useState(null);
+  const overlayRef = useRef(null)
   // const usersPerPage = 30;
   const usersPerPage = 5;
+
+  const queryClient = useQueryClient();
 
   // Fetch users
   const {
@@ -40,9 +45,11 @@ const InstructorPage = () => {
   } = useQuery({
     queryKey: ["users", selected, search, currentPage],
     queryFn: () => getUsers({ search, page: currentPage, limit: usersPerPage,
-            type: selected === "students" ? "students" : "users"
+            type: selected === "students" ? "students" : "users",
+            status: selected === "active" ? "active"  : selected === "inactive" ? "inactive" : ""
         }),
-    enabled: selected === "users" || selected === "students",
+    // enabled: selected === "users" || selected === "students"
+     enabled: ["users", "students", "active", "inactive"].includes(selected)
   });
 
   // Fetch instructors
@@ -57,6 +64,23 @@ const InstructorPage = () => {
       getInstructors({ search, page: currentPage, limit: usersPerPage }),
     enabled: selected === "instructors",
   });
+
+  // Update Status
+   const { mutate: mutateUserStatus, isPending: isUpdating } = useMutation({
+     mutationFn: updateUserStatus,
+     onSuccess: (data) => {
+       console.log("✅ Status updated:", data);
+       toast.success(data.message)
+       // Refetch user/instructor list after update
+       queryClient.invalidateQueries(["users"]);
+       queryClient.invalidateQueries(["instructors"]);
+       queryClient.refetchQueries(["users"]);
+       queryClient.refetchQueries(["instructors"]);
+     },
+     onError: (error) => {
+       console.error("❌ Error updating status:", error);
+     },
+   });
 
   const handleRequestClick = () => setShowRequestPage(true);
   const handleBackToUsers = () => setShowRequestPage(false);
@@ -82,11 +106,42 @@ const InstructorPage = () => {
 
   const handlePageClick = (pageNumber) => setCurrentPage(pageNumber);
 
+  {/*  |____EDIT____|  */}
+  const HandleDelete  = (userId) => {
+        console.log("Delete", userId);
+  }
+
+  const HandleStatus = (user) => {
+        const newStatus = user.status ===true ? "inactive" : "active";
+        mutateUserStatus(
+            {status: newStatus, userId: user.id},
+            {
+                onSuccess: () => {
+                    setIsEditId(null);
+                },
+            }
+        )
+  };
+
   useEffect(() => {
     if (showRequestPage) {
         setIsOpenDetails(false);
     }
-  }, [showRequestPage])
+    function handleClickOutside(e) {
+        if (overlayRef.current && !overlayRef.current.contains(e.target)) {
+           setIsEditId(null);
+        }
+    }
+
+     if (isEditId) {
+          document.addEventListener("mousedown", handleClickOutside);
+     } else {
+          document.removeEventListener("mousedown", handleClickOutside);
+     }
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+  }, [showRequestPage, isEditId])
 
   if (showRequestPage) {
     return (
@@ -112,9 +167,6 @@ const InstructorPage = () => {
     selected === "instructors" ? instructorsLoading : usersLoading;
   const isError = selected === "instructors" ? instructorsError : usersError;
   const refetch = selected === "instructors" ? refetchInstructors : refetchUsers;
-
-    console.log("userData", usersData)
-
 
   return (
     <div className="w-full">
@@ -148,57 +200,55 @@ const InstructorPage = () => {
             )}
           </div>
 
-<div className="relative mb-7 flex flex-col items-center text-center">
-  {/* 🔴 Notification Icon */}
-  <div
-    id="dropdownHoverButton"
-    className="absolute top-3 left-4 md:left-10 cursor-pointer"
-    onClick={handleRequestClick}
-    onMouseEnter={() => setIsOpenDetails(true)}
-    onMouseLeave={() => setIsOpenDetails(false)}
-  >
-    <MessageCircleWarning
-      size={35}
-      className="bg-red-400 dark:bg-blue-950 rounded-full"
-    />
-    {isOpenDetils && (
-      <div
-        id="dropdownHover"
-        className="absolute z-10 mt-5 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 h-9 dark:bg-gray-700 py-1 text-sm"
-      >
-        Request Incoming
-      </div>
-    )}
-  </div>
+        <div className="relative mb-7 flex flex-col items-center text-center">
+          {/* 🔴 Notification Icon */}
+          <div
+            id="dropdownHoverButton"
+            className="absolute top-3 left-4 md:left-10 cursor-pointer"
+            onClick={handleRequestClick}
+            onMouseEnter={() => setIsOpenDetails(true)}
+            onMouseLeave={() => setIsOpenDetails(false)}
+          >
+            <MessageCircleWarning
+              size={35}
+              className="bg-red-400 dark:bg-blue-950 rounded-full"
+            />
+            {isOpenDetils && (
+              <div
+                id="dropdownHover"
+                className="absolute z-10 mt-5 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 h-9 dark:bg-gray-700 py-1 text-sm"
+              >
+                Request Incoming
+              </div>
+            )}
+          </div>
 
-  {/* 🟣 Responsive Select + Input */}
-  <div className="flex flex-col md:flex-row items-center justify-center gap-4 mt-12 md:mt-0 w-full px-4">
-    <select
-      value={selected}
-      onChange={(e) => setSelected(e.target.value)}
-      className="w-full sm:w-1/2 md:w-auto shadow-md dark:bg-blue-700 dark:shadow-amber-950 hover:shadow-fuchsia-950
-                 rounded-md border border-blue-500  px-6 py-2 md:py-3 bg-white text-lg md:text-xl"
-    >
-      {["users", "students", "instructors"].map((option) => (
-        <option key={option} value={option.toLowerCase()}>
-          {option}
-        </option>
-      ))}
-    </select>
+          {/* 🟣 Responsive Select + Input */}
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 mt-12 md:mt-0 w-full px-4">
+            <select
+              value={selected}
+              onChange={(e) => setSelected(e.target.value)}
+              className="w-full sm:w-1/2 md:w-auto shadow-md dark:bg-blue-700 dark:shadow-amber-950 hover:shadow-fuchsia-950 rounded-md border border-blue-500  px-6 py-2 md:py-3 bg-white text-lg md:text-xl"
+            >
+              {["users", "students", "instructors", "inactive", "active"].map((option) => (
+                <option key={option} value={option.toLowerCase()}>
+                  {option}
+                </option>
+              ))}
+            </select>
 
-    <input
-      type="text"
-      placeholder="search here ..."
-      value={search}
-      onChange={(e) => {
-        setSearch(e.target.value);
-        setCurrentPage(1);
-      }}
-      className="shadow-md w-full md:w-1/2 py-3 bg-white rounded-2xl px-6
-                 dark:text-black placeholder:text-slate-400 dark:placeholder:text-slate-500"
-    />
-  </div>
-</div>
+            <input
+              type="text"
+              placeholder="search here ..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="shadow-md w-full md:w-1/2 py-3 bg-white rounded-2xl px-6 dark:text-black placeholder:text-slate-400 dark:placeholder:text-slate-500"
+            />
+          </div>
+        </div>
 
       {isLoading ? (
          <div className="fixed inset-0 flex justify-center items-center bg-white/70 dark:bg-black/30 z-50">
@@ -215,23 +265,38 @@ const InstructorPage = () => {
           </button>
         </div>
       ) : displayData.length > 0 ? (
-<div className="grid min-[410px]:grid-cols-2 grid-cols-1 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 px-4 md:px-10">
+        <div className="grid min-[410px]:grid-cols-2 grid-cols-1 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 px-4 md:px-10" >
           {displayData.map((user) => (
         <div
           key={user.id}
           className="w-full p-1 sm:p-2 md:p-4 relative shadow-md rounded-md border dark:border-gray-700
-                     transition-transform transform hover:scale-105 hover:shadow-lg bg-white dark:bg-gray-900"
-            >
-                <span className="absolute top-1 right-1 hidden md:block">
-                 {
-                   user.status ? <CircleCheckBig /> :<> {<Ban className="text-red-700"/>} </>
-                 }
-                </span>
+             transition-transform transform hover:scale-105 hover:shadow-lg bg-white dark:bg-gray-900"
+          onClick={() => {
+               setIsEditId(user.id)
+           }} >
+
+            {isEditId === user.id && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-800/20  rounded-md backdrop-blur-[1px]"
+          onClick={(e) => {
+              if (e.target === e.currentTarget) setIsEditId(null);
+            }}
+                                            >
+          <section className="space-y-1 bg-white dark:bg-blue-300 p-2 rounded-md shadow-lg text-black"
+            ref={overlayRef} >
+              <p className="px-5 py-1 hover:bg-slate-200 rounded" onClick={() => HandleDelete(user.id)}> delete </p>
+              <p className="px-5 py-1 hover:bg-slate-200 rounded" onClick={ () => HandleStatus(user)}>  { user.status === true ? "inactive" : "active"} </p>
+                  </section>
+                 </div>
+                 )
+               }
+              <span className="absolute top-1 right-1 hidden md:block">
+                 { user.status === true ? <CircleCheckBig /> :<> {<Ban className="text-red-700"/>} </> }
+              </span>
               <p className="text-base">{user.name}</p>
               <p className="text-base">{user.email}</p>
               <p className="text-base">{user.phone}</p>
               <p className="text-base">{user.role}</p>
-              <p className="text-base">status: {user.status ? "active" : "inactive"}</p>
+              {/* <p className="text-base">status: {user.status===true ? "active" : "inactive"}</p> */}
             </div>
           ))}
         </div>
@@ -276,7 +341,7 @@ const InstructorPage = () => {
         </div>
       )}
     </div>
-    </div>
+   </div>
   );
 };
 
