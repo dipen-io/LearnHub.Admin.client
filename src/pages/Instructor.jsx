@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { MessageCircleWarning, MoveLeft } from "lucide-react";
+import { MessageCircleWarning, MoveLeft, Ban, CircleCheckBig } from "lucide-react";
 import RequestList from "../components/Request";
 import { getInstructors, getUsers } from "../service/user";
 import Loader from "../components/Loading";
@@ -10,7 +10,8 @@ const normalizeUserData = (user) => ({
   name: user.fullName || "Unknown User",
   email: user.email || "No Email",
   phone: user.phoneNumber || "No Phone",
-  role: user.role || "No Role"
+  role: user.role || "No Role",
+  status: user.isActive || "status"
 });
 
 const normalizeInstructorData = (instructor) => ({
@@ -18,6 +19,7 @@ const normalizeInstructorData = (instructor) => ({
   name: instructor.fullName || instructor.channelName || "Unknown Instructor",
   email: instructor.email || "No Email",
   phone: instructor.phoneNumber || "No Phone",
+  status: instructor.isActive || ""
 });
 
 const InstructorPage = () => {
@@ -111,63 +113,92 @@ const InstructorPage = () => {
   const isError = selected === "instructors" ? instructorsError : usersError;
   const refetch = selected === "instructors" ? refetchInstructors : refetchUsers;
 
+    console.log("userData", usersData)
+
 
   return (
-    <div className="">
-      <div className="px-10 py-7">
+    <div className="w-full">
+      <div className="md:px-10 md:py-7 py-4 px-13 ">
         <h1 className="font-bold md:text-2xl">
           {selected === "instructors" ? "Instructors List" : "Users List"}
         </h1>
         <h1 className="h-0.5 bg-blue-700"></h1>
       </div>
 
-      {/* Filter + Search */}
-      <div className="text-center mb-7 relative">
-        <div
-          id="dropdownHoverButton"
-          className="absolute top-3 cursor-pointer left-10"
-          onClick={handleRequestClick}
-          onMouseEnter={() => setIsOpenDetails(true)}
-          onMouseLeave={() => setIsOpenDetails(false)}
-        >
-          <MessageCircleWarning
-            size={35}
-            className="bg-red-400 dark:bg-blue-950 rounded-full"
-          />
-          { isOpenDetils && (
-            <div id="dropdownHover"
-             className="absolute z-10 mt-5 bg-white divide-y divide-gray-100 rounded-lg shado             w-sm w-44 h-9 dark:bg-gray-700 py-1" >
-            Request Incoming
-            </div>
-            )}
-        </div>
-
-        <div className="flex ml-25">
-          <select
-            value={selected}
-            onChange={(e) => setSelected(e.target.value)}
-  className="mr-10 shadow-md dark:bg-blue-700 dark:shadow-amber-950 hover:shadow-fuchsia-950 rounded-md border border-blue-500 px-10 py-3 bg-white text-xl"
+        <div className="text-center mb-7 relative">
+          {/* 🔴 Notification Icon */}
+          <div
+            id="dropdownHoverButton"
+            className="absolute top-3 left-4 md:left-10 cursor-pointer"
+            onClick={handleRequestClick}
+            onMouseEnter={() => setIsOpenDetails(true)}
+            onMouseLeave={() => setIsOpenDetails(false)}
           >
-            {["users", "students", "instructors"].map((option) => (
-              <option key={option} value={option.toLowerCase()}>
-                {option}
-              </option>
-            ))}
-          </select>
+            <MessageCircleWarning
+              size={35}
+              className="bg-red-400 dark:bg-blue-950 rounded-full"
+            />
+            {isOpenDetils && (
+              <div
+                id="dropdownHover"
+                className="absolute z-10 mt-5 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 h-9 dark:bg-gray-700 py-1 text-sm"
+              >
+                Request Incoming
+              </div>
+            )}
+          </div>
 
-          <input
-            type="text"
-            placeholder="search here ..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="shadow-md lg:w-1/2 w-full md:mx-0 mx-2 py-3 bg-white rounded-2xl px-5 dark:text-black
- placeholder:text-slate-400 dark:placeholder:text-slate-500"
-          />
-        </div>
+<div className="relative mb-7 flex flex-col items-center text-center">
+  {/* 🔴 Notification Icon */}
+  <div
+    id="dropdownHoverButton"
+    className="absolute top-3 left-4 md:left-10 cursor-pointer"
+    onClick={handleRequestClick}
+    onMouseEnter={() => setIsOpenDetails(true)}
+    onMouseLeave={() => setIsOpenDetails(false)}
+  >
+    <MessageCircleWarning
+      size={35}
+      className="bg-red-400 dark:bg-blue-950 rounded-full"
+    />
+    {isOpenDetils && (
+      <div
+        id="dropdownHover"
+        className="absolute z-10 mt-5 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 h-9 dark:bg-gray-700 py-1 text-sm"
+      >
+        Request Incoming
       </div>
+    )}
+  </div>
+
+  {/* 🟣 Responsive Select + Input */}
+  <div className="flex flex-col md:flex-row items-center justify-center gap-4 mt-12 md:mt-0 w-full px-4">
+    <select
+      value={selected}
+      onChange={(e) => setSelected(e.target.value)}
+      className="w-full sm:w-1/2 md:w-auto shadow-md dark:bg-blue-700 dark:shadow-amber-950 hover:shadow-fuchsia-950
+                 rounded-md border border-blue-500  px-6 py-2 md:py-3 bg-white text-lg md:text-xl"
+    >
+      {["users", "students", "instructors"].map((option) => (
+        <option key={option} value={option.toLowerCase()}>
+          {option}
+        </option>
+      ))}
+    </select>
+
+    <input
+      type="text"
+      placeholder="search here ..."
+      value={search}
+      onChange={(e) => {
+        setSearch(e.target.value);
+        setCurrentPage(1);
+      }}
+      className="shadow-md w-full md:w-1/2 py-3 bg-white rounded-2xl px-6
+                 dark:text-black placeholder:text-slate-400 dark:placeholder:text-slate-500"
+    />
+  </div>
+</div>
 
       {isLoading ? (
          <div className="fixed inset-0 flex justify-center items-center bg-white/70 dark:bg-black/30 z-50">
@@ -184,16 +215,23 @@ const InstructorPage = () => {
           </button>
         </div>
       ) : displayData.length > 0 ? (
-        <div className="grid lg:grid-cols-5 md:ml-10 grid-cols-1 gap-4">
+<div className="grid min-[410px]:grid-cols-2 grid-cols-1 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 px-4 md:px-10">
           {displayData.map((user) => (
-            <div
-              key={user.id}
-              className="w-60 shadow-cyan-300 rounded-md p-3 border dark:border-gray-700"
+        <div
+          key={user.id}
+          className="w-full p-1 sm:p-2 md:p-4 relative shadow-md rounded-md border dark:border-gray-700
+                     transition-transform transform hover:scale-105 hover:shadow-lg bg-white dark:bg-gray-900"
             >
+                <span className="absolute top-1 right-1 hidden md:block">
+                 {
+                   user.status ? <CircleCheckBig /> :<> {<Ban className="text-red-700"/>} </>
+                 }
+                </span>
               <p className="text-base">{user.name}</p>
               <p className="text-base">{user.email}</p>
               <p className="text-base">{user.phone}</p>
               <p className="text-base">{user.role}</p>
+              <p className="text-base">status: {user.status ? "active" : "inactive"}</p>
             </div>
           ))}
         </div>
@@ -237,6 +275,7 @@ const InstructorPage = () => {
           </button>
         </div>
       )}
+    </div>
     </div>
   );
 };

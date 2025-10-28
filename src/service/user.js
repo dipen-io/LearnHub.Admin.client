@@ -63,3 +63,16 @@ export const getStudents = async(params = {}) => {
     const { data } = await axiosInstance.get(`users?${query.toString()}`);
     return data;
 }
+
+export const updateUserStatus = async(params) => {
+    const {status, userId } = params;
+    // Build query string dynamically
+    const query =  new URLSearchParams({
+        status: String(status),
+        userId: String(userId),
+    });
+    const { data } = await axiosInstance.patch(`admin/users/status?${query.toString()}`);
+    return data;
+}
+
+// PATCH admin/user/status?status=active&userId=42
