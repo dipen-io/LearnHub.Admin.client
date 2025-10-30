@@ -1,12 +1,12 @@
 import { NavLink } from "react-router-dom";
 import ToggleTheme from "../hooks/toggleTheme";
-import { House, User, Play, X, LogIn } from "lucide-react";
+import { LayoutGrid, House, User, Play, X, LogIn, ChartNetwork } from "lucide-react";
 
 const SidebarComponent = ({ visible = true, onClose }) => {
   return (
     <div
       className={`
-        fixed top-0 left-0 h-screen w-64 z-50 bg-sky-200 dark:bg-stone-400 dark:text-green-800
+        fixed top-0 left-0 h-screen md:w-1/4 z-50 bg-sky-200 dark:bg-stone-400 dark:text-green-800
         transition-transform duration-300 ease-in-out
         ${visible ? "translate-x-0" : "-translate-x-full"}
         md:relative md:translate-x-0
@@ -64,6 +64,18 @@ const SidebarComponent = ({ visible = true, onClose }) => {
           <Play />
           Course
         </NavLink>
+
+        <NavLink
+          to="/category"
+          className={({ isActive }) =>
+            `flex gap-3 px-5 py-2 transition ${
+              isActive ? "bg-amber-100 font-semibold" : "hover:bg-amber-100"
+            }`
+          }
+        >
+        <LayoutGrid />
+          category
+        </NavLink>
         <NavLink
           to="/login"
           className={({ isActive }) =>
@@ -77,7 +89,7 @@ const SidebarComponent = ({ visible = true, onClose }) => {
         </NavLink>
       </nav>
 
-      <div className="absolute bottom-2 mx-2">
+      <div className="absolute bottom-2 w-full ">
         <ToggleTheme />
       </div>
     </div>

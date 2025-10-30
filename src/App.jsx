@@ -6,6 +6,8 @@ import CoursePage from "./pages/Course";
 import { useState } from "react";
 import { TextAlignJustify } from "lucide-react";
 import LoginPage from "./pages/Login";
+import CategoryPage from "./pages/Category";
+import SingleCategory from "./pages/SingleCategory";
 
 function App() {
   const [showSidebar, setShowSidber] = useState(true);
@@ -31,6 +33,8 @@ function App() {
         <Route path="/Instructor" element={<InstructorPage />} />
         <Route path="/Course" element={<CoursePage />} />
         <Route path="/Login" element={<LoginPage />} />
+        <Route path="/category" element={<CategoryPage />} />
+        <Route path="/category/:id" element={<SingleCategory />} />
       </Routes>
      </div>
     </Router>
