@@ -242,7 +242,8 @@ const RenderCategory = () => {
         <button
           onClick={handleAddCategoryClick}
           className="py-2 px-4 rounded-md bg-white text-blue-800 border border-blue-400
-                     hover:bg-blue-600 hover:text-white dark:text-white
+                     hover:bg-blue-600 hover:text-white  dark:text-white
+                            dark:bg-gray-800
                      transition-all duration-200 hover:shadow hover:shadow-blue-900 font-semibold">
           + Create Category
         </button>
