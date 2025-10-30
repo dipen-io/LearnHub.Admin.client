@@ -7,12 +7,11 @@ export const CreateCategory = async(categoryData) => {
 }
 
 // Get Category
-export const GetCategory = async(search) => {
+export const GetCategory = async(search, page, limit) => {
     const query = new URLSearchParams({
-        search
+        search, page, limit
     })
     const { data } = await axiosInstance.get(`category?${query.toString()}`);
-    console.log("DATA", data);
     return data
 }
 

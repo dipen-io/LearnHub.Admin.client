@@ -4,9 +4,11 @@ import { RemoveCategory, CreateCategory, GetCategory } from "../service/category
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import Loader from "../components/Loading"
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const RenderCategory = () => {
-
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(45);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState({
     name: "",
@@ -22,9 +24,10 @@ const RenderCategory = () => {
 
   // Fetch categories
   const { data: categories, isLoading: isCategoryLoading, error: categoryError } = useQuery({
-    queryKey: ["categories", query],
-    queryFn: () => GetCategory(query),
-    select: (responseData) => responseData.data,
+    queryKey: ["categories", query, page, limit],
+    queryFn: () => GetCategory(query, page, limit),
+    // select: (responseData) => responseData.data,
+    keepPreviousData: true,
   });
 
   // Mutation for creating category
@@ -33,7 +36,7 @@ const RenderCategory = () => {
     onSuccess: () => {
       toast.success("Category created successfully!");
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      setIsCreating(false); // Go back to the list view after success
+      setIsCreating(false);
       setCategory({ name: "", slug: "", description: "" }); // clear form
     },
     onError: (err) => {
@@ -56,6 +59,25 @@ const RenderCategory = () => {
   // -------------------
   // HANDLERS
   // -------------------
+    const Category = categories?.data || [];
+    const totalItems = categories?.total || 0;
+    const currentPage = categories?.page || 1;
+
+    const totalPage = Math.ceil(totalItems / limit);
+    const hasNextPage = currentPage < totalPage;
+    const hasPrevPage = currentPage > 1;
+
+    const handleNext = () => {
+        if (hasNextPage) {
+            setPage(currentPage + 1);
+        }
+    };
+
+    const handlePrev = () => {
+        if (hasPrevPage) {
+            setPage(currentPage - 1);
+        }
+    };
 
   const handleChange = (e) => {
     setCategory({
@@ -162,14 +184,15 @@ const RenderCategory = () => {
   // -------------------
 
   return (
-    <div className="px-4 sm:px-8 md:px-16 lg:px-24 py-10">
+        <>
+    <div className="px-4 sm:px-8 md:px-16 lg:px-24 pt-10">
 
         {/*  Search Bar */}
         <div className='w-full text-center my-5'>
-             <input type="text" placeholder='search category'
-                 value={query}
-                 onChange={(e) => setQuery(e.target.value)}
-                 className='bg-white text-black w-full md:w-1/2 py-2 px-5 dark:bg-slate-100 placeholder:text-slate-400  rounded-2xl text-xl '/>
+            <input type="text" placeholder='search category'
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className='shadow-xl bg-white text-black w-full md:w-1/2 py-2 px-5 dark:bg-slate-100 placeholder:text-slate-400  rounded-2xl text-xl '/>
         </div>
 
       {/* Category list */}
@@ -180,52 +203,74 @@ const RenderCategory = () => {
 
       {!isCategoryLoading && !categoryError && (
         <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-    {categories?.map((cat) => (
-      <div
-        key={cat.id}
-        className="group flex items-center justify-between text-blue-800 dark:text-white
-                   bg-white dark:bg-gray-800 py-1 px-4 rounded-md border border-blue-400
-                   transition-all duration-200 ease-in-out hover:bg-blue-600 hover:text-white
-                   hover:shadow hover:shadow-blue-900 w-full sm:w-auto"
-      >
-        <Link to={`/category/${cat.id}`}>
-          <div className="flex items-center gap-3 transition-all duration-200">
-            <strong>{cat.name}</strong>
-          </div>
-        </Link>
+            {Category?.map((cat) => (
+              <div
+                key={cat.id}
+                className="group flex items-center justify-between text-blue-800 dark:text-white
+                           bg-white dark:bg-gray-800 py-1 px-4 rounded-md border border-blue-400
+                           transition-all duration-200 ease-in-out hover:bg-blue-600 hover:text-white
+                           hover:shadow hover:shadow-blue-900 w-full sm:w-auto"
+              >
+                <Link to={`/category/${cat.id}`}>
+                  <div className="flex items-center gap-3 transition-all duration-200">
+                    <strong>{cat.name}</strong>
+                  </div>
+                </Link>
 
-        {/* delete button — appears smoothly */}
-        <button
-          onClick={() => handleDelete(cat.id)}
-          disabled={isDeleting}
-          className="
-            max-w-0 opacity-0 overflow-hidden
-            group-hover:max-w-full group-hover:opacity-100
-            ml-3 px-3 py-1 rounded-md  border border-white
-            hover:text-black hover:bg-white transition-all duration-200
-            disabled:opacity-50 font-semibold
-          "
-        >
-          {isDeleting ? "Deleting..." : "Delete"}
-        </button>
-      </div>
-    ))}
+                {/* delete button — appears smoothly */}
+                <button
+                  onClick={() => handleDelete(cat.id)}
+                  disabled={isDeleting}
+                  className="
+                    max-w-0 opacity-0 overflow-hidden
+                    group-hover:max-w-full group-hover:opacity-100
+                    ml-3 px-3 py-1 rounded-md  border border-white
+                    hover:text-black hover:bg-white transition-all duration-200
+                    disabled:opacity-50 font-semibold
+                  "
+                >
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </button>
+              </div>
+            ))}
         </div>
       )}
 
       {/* Button */}
-            {!isCategoryLoading  && (
-      <div className="mt-6 flex justify-center sm:justify-start">
+     {!isCategoryLoading  && (
+      <div className="mt-3 flex justify-center sm:justify-start">
         <button
           onClick={handleAddCategoryClick}
-          className="py-2 px-4 rounded-md text-blue-800 border border-blue-400
+          className="py-2 px-4 rounded-md bg-white text-blue-800 border border-blue-400
                      hover:bg-blue-600 hover:text-white dark:text-white
-                     transition-all duration-200 hover:shadow hover:shadow-blue-900">
+                     transition-all duration-200 hover:shadow hover:shadow-blue-900 font-semibold">
           + Create Category
         </button>
       </div>
        )}
     </div>
+
+      {/* Pagination */}
+    <div className="py-4 md:mt-10 flex md:mx-30 justify-center md:justify-end items-center gap-6">
+        <span className="text-gray-600 dark:text-gray-400">
+          Page {currentPage} of {totalPage}
+        </span>
+        <button
+          onClick={handlePrev}
+          disabled={!hasPrevPage || isCategoryLoading}
+          className="disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <ChevronLeft size={30} />
+        </button>
+        <button
+          onClick={handleNext}
+          disabled={!hasNextPage || isCategoryLoading}
+          className="disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <ChevronRight size={30} />
+        </button>
+      </div>
+  </>
   );
 };
 

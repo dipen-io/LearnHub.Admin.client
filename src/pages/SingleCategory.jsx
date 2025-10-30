@@ -4,7 +4,7 @@ import { GetSingleCategory, UpdateCategory, RemoveCategory } from '../service/ca
 import Loader from "../components/Loading";
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const SingleCategory = () => {
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
@@ -128,6 +128,11 @@ const handleSubmit = (e) => {
             >
               Update
             </button>
+            <Link to={"/category"}
+              className="hover:font-bold rounded py-1 px-4 border border-blue-500 hover:bg-green-500 hover:text-white text-black"
+            >
+              Cancel
+            </Link>
           </div>
         </>
       ) : (
