@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery,  useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MessageCircleWarning, MoveLeft, Ban, CircleCheckBig } from "lucide-react";
 import RequestList from "../components/Request";
 import { deleteUserParmanently, getInstructors, getUsers, updateUserStatus } from "../service/user";
@@ -44,12 +44,13 @@ const InstructorPage = () => {
     refetch: refetchUsers,
   } = useQuery({
     queryKey: ["users", selected, search, currentPage],
-    queryFn: () => getUsers({ search, page: currentPage, limit: usersPerPage,
-            type: selected === "students" ? "students" : "users",
-            status: selected === "active" ? "active"  : selected === "inactive" ? "inactive" : ""
-        }),
+    queryFn: () => getUsers({
+      search, page: currentPage, limit: usersPerPage,
+      type: selected === "students" ? "students" : "users",
+      status: selected === "active" ? "active" : selected === "inactive" ? "inactive" : ""
+    }),
     // enabled: selected === "users" || selected === "students"
-     enabled: ["users", "students", "active", "inactive"].includes(selected)
+    enabled: ["users", "students", "active", "inactive"].includes(selected)
   });
 
   // Fetch instructors
@@ -66,44 +67,44 @@ const InstructorPage = () => {
   });
 
   // Update Status
-   const { mutate: mutateUserStatus, isPending: isUpdating } = useMutation({
-     mutationFn: updateUserStatus,
-     onSuccess: (data) => {
-       console.log("✅ Status updated:", data);
-       toast.success(data.message)
-       // Refetch user/instructor list after update
-       queryClient.invalidateQueries(["users"]);
-       queryClient.invalidateQueries(["instructors"]);
-       queryClient.refetchQueries(["users"]);
-       queryClient.refetchQueries(["instructors"]);
-     },
-     onError: (error) => {
-       console.error("❌ Error updating status:", error);
-     },
-   });
+  const { mutate: mutateUserStatus, isPending: isUpdating } = useMutation({
+    mutationFn: updateUserStatus,
+    onSuccess: (data) => {
+      console.log("✅ Status updated:", data);
+      toast.success(data.message)
+      // Refetch user/instructor list after update
+      queryClient.invalidateQueries(["users"]);
+      queryClient.invalidateQueries(["instructors"]);
+      queryClient.refetchQueries(["users"]);
+      queryClient.refetchQueries(["instructors"]);
+    },
+    onError: (error) => {
+      console.error("❌ Error updating status:", error);
+    },
+  });
 
   // DELETE USER
-   const { mutate: mutateUserDelete, isPending: isDeleting } = useMutation({
-     mutationFn: deleteUserParmanently,
-     onSuccess: (data) => {
-       console.log("✅ DELETING RESPONSE:", data);
+  const { mutate: mutateUserDelete, isPending: isDeleting } = useMutation({
+    mutationFn: deleteUserParmanently,
+    onSuccess: (data) => {
+      console.log("✅ DELETING RESPONSE:", data);
 
-        if(data.success){
-            toast.success(data.message)
-        } else if (data?.response?.statusCode === 404) {
-           toast.error(data.message)
-        }
-       // Refetch user/instructor list after update
-       queryClient.invalidateQueries(["users"]);
-       queryClient.invalidateQueries(["instructors"]);
-       queryClient.refetchQueries(["users"]);
-       queryClient.refetchQueries(["instructors"]);
-     },
-     onError: (error) => {
-       toast.error(error.response.data.error.message);
-       console.error("❌ Error Deleting user:", error);
-     },
-   });
+      if (data.success) {
+        toast.success(data.message)
+      } else if (data?.response?.statusCode === 404) {
+        toast.error(data.message)
+      }
+      // Refetch user/instructor list after update
+      queryClient.invalidateQueries(["users"]);
+      queryClient.invalidateQueries(["instructors"]);
+      queryClient.refetchQueries(["users"]);
+      queryClient.refetchQueries(["instructors"]);
+    },
+    onError: (error) => {
+      toast.error(error.response.data.error.message);
+      console.error("❌ Error Deleting user:", error);
+    },
+  });
 
   const handleRequestClick = () => setShowRequestPage(true);
   const handleBackToUsers = () => setShowRequestPage(false);
@@ -129,46 +130,46 @@ const InstructorPage = () => {
 
   const handlePageClick = (pageNumber) => setCurrentPage(pageNumber);
 
-  {/*  |____EDIT____|  */}
-  {/* DELTE USERS  */}
-const HandleDelete  = (userId) => {
+  {/*  |____EDIT____|  */ }
+  {/* DELTE USERS  */ }
+  const HandleDelete = (userId) => {
     mutateUserDelete({ userId: userId },
-        {
-            onSuccess: () => {
-                setIsEditId(null);
-            }
+      {
+        onSuccess: () => {
+          setIsEditId(null);
         }
+      }
     )
-}
+  }
 
-  {/* UPDATE STATUS  */}
+  {/* UPDATE STATUS  */ }
   const HandleStatus = (user) => {
-        const newStatus = user.status === true ? "inactive" : "active";
-        mutateUserStatus(
-            {status: newStatus, userId: user.id},
-            {
-                onSuccess: () => {
-                    setIsEditId(null);
-                },
-            }
-        )
+    const newStatus = user.status === true ? "inactive" : "active";
+    mutateUserStatus(
+      { status: newStatus, userId: user.id },
+      {
+        onSuccess: () => {
+          setIsEditId(null);
+        },
+      }
+    )
   };
 
   useEffect(() => {
     if (showRequestPage) {
-        setIsOpenDetails(false);
+      setIsOpenDetails(false);
     }
     function handleClickOutside(e) {
-        if (overlayRef.current && !overlayRef.current.contains(e.target)) {
-           setIsEditId(null);
-        }
+      if (overlayRef.current && !overlayRef.current.contains(e.target)) {
+        setIsEditId(null);
+      }
     }
 
-     if (isEditId) {
-          document.addEventListener("mousedown", handleClickOutside);
-     } else {
-          document.removeEventListener("mousedown", handleClickOutside);
-     }
+    if (isEditId) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
 
     return () => document.removeEventListener("mousedown", handleClickOutside);
 
@@ -208,28 +209,28 @@ const HandleDelete  = (userId) => {
         <h1 className="h-0.5 bg-blue-700"></h1>
       </div>
 
-        <div className="text-center mb-7 relative">
-          {/* 🔴 Notification Icon */}
-          <div
-            id="dropdownHoverButton"
-            className="absolute top-3 left-4 md:left-10 cursor-pointer"
-            onClick={handleRequestClick}
-            onMouseEnter={() => setIsOpenDetails(true)}
-            onMouseLeave={() => setIsOpenDetails(false)}
-          >
-            <MessageCircleWarning
-              size={35}
-              className="bg-red-400 dark:bg-blue-950 rounded-full"
-            />
-            {isOpenDetils && (
-              <div
-                id="dropdownHover"
-                className="absolute z-10 mt-5 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 h-9 dark:bg-gray-700 py-1 text-sm"
-              >
-                Request Incoming
-              </div>
-            )}
-          </div>
+      <div className="text-center mb-7 relative">
+        {/* 🔴 Notification Icon */}
+        <div
+          id="dropdownHoverButton"
+          className="absolute top-3 left-4 md:left-10 cursor-pointer"
+          onClick={handleRequestClick}
+          onMouseEnter={() => setIsOpenDetails(true)}
+          onMouseLeave={() => setIsOpenDetails(false)}
+        >
+          <MessageCircleWarning
+            size={35}
+            className="bg-red-400 dark:bg-blue-950 rounded-full"
+          />
+          {isOpenDetils && (
+            <div
+              id="dropdownHover"
+              className="absolute z-10 mt-5 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 h-9 dark:bg-gray-700 py-1 text-sm"
+            >
+              Request Incoming
+            </div>
+          )}
+        </div>
 
         <div className="relative mb-7 flex flex-col items-center text-center">
           {/* 🔴 Notification Icon */}
@@ -281,98 +282,97 @@ const HandleDelete  = (userId) => {
           </div>
         </div>
 
-      {isLoading ? (
-         <div className="fixed inset-0 flex justify-center items-center bg-white/70 dark:bg-black/30 z-50">
+        {isLoading ? (
+          <div className="fixed inset-0 flex justify-center items-center bg-white/70 dark:bg-black/30 z-50">
             <Loader />
           </div>
-      ) : isError ? (
-        <div className="text-center text-red-500">
-          Failed to fetch {selected}.
-          <button
-            className="ml-2 underline text-blue-600"
-            onClick={() => refetch()}
-          >
-            Retry
-          </button>
-        </div>
-      ) : displayData.length > 0 ? (
-        <div className="grid min-[410px]:grid-cols-2 grid-cols-1 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 px-4 md:px-10" >
-          {displayData.map((user) => (
-        <div
-          key={user.id}
-          className="w-full p-1 sm:p-2 md:p-4 relative shadow-md rounded-md border dark:border-gray-700
+        ) : isError ? (
+          <div className="text-center text-red-500">
+            Failed to fetch {selected}.
+            <button
+              className="ml-2 underline text-blue-600"
+              onClick={() => refetch()}
+            >
+              Retry
+            </button>
+          </div>
+        ) : displayData.length > 0 ? (
+          <div className="grid min-[410px]:grid-cols-2 grid-cols-1 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 px-4 md:px-10" >
+            {displayData.map((user) => (
+              <div
+                key={user.id}
+                className="w-full p-1 sm:p-2 md:p-4 relative shadow-md rounded-md border dark:border-gray-700
              transition-transform transform hover:scale-105 hover:shadow-lg bg-white dark:bg-gray-900"
-          onClick={() => {
-               setIsEditId(user.id)
-           }} >
+                onClick={() => {
+                  setIsEditId(user.id)
+                }} >
 
-            {isEditId === user.id && (
-                <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-800/20  rounded-md backdrop-blur-[1px]"
-          onClick={(e) => {
-              if (e.target === e.currentTarget) setIsEditId(null);
-            }}
-                                            >
-          <section className="space-y-1 bg-white dark:bg-blue-300 p-2 rounded-md shadow-lg text-black"
-            ref={overlayRef} >
-              <p className="px-5 py-1 hover:bg-slate-200 rounded" onClick={() => HandleDelete(user.id)}> delete </p>
-              <p className="px-5 py-1 hover:bg-slate-200 rounded" onClick={ () => HandleStatus(user)}>  { user.status === true ? "inactive" : "active"} </p>
-                  </section>
-                 </div>
-                 )
-               }
-              <span className="absolute top-1 right-1 hidden md:block">
-                 { user.status === true ? <CircleCheckBig /> :<> {<Ban className="text-red-700"/>} </> }
-              </span>
-              <p className="text-base">{user.name}</p>
-              <p className="text-base">{user.email}</p>
-              <p className="text-base">{user.phone}</p>
-              <p className="text-base">{user.role}</p>
-              {/* <p className="text-base">status: {user.status===true ? "active" : "inactive"}</p> */}
-            </div>
-          ))}
-        </div>
-      ): (
-         <div className="text-center text-gray-500">
+                {isEditId === user.id && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-800/20  rounded-md backdrop-blur-[1px]"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget) setIsEditId(null);
+                    }}
+                  >
+                    <section className="space-y-1 bg-white dark:bg-blue-300 p-2 rounded-md shadow-lg text-black"
+                      ref={overlayRef} >
+                      <p className="px-5 py-1 hover:bg-slate-200 rounded" onClick={() => HandleDelete(user.id)}> delete </p>
+                      <p className="px-5 py-1 hover:bg-slate-200 rounded" onClick={() => HandleStatus(user)}>  {user.status === true ? "inactive" : "active"} </p>
+                    </section>
+                  </div>
+                )
+                }
+                <span className="absolute top-1 right-1 hidden md:block">
+                  {user.status === true ? <CircleCheckBig /> : <> {<Ban className="text-red-700" />} </>}
+                </span>
+                <p className="text-base">{user.name}</p>
+                <p className="text-base">{user.email}</p>
+                <p className="text-base">{user.phone}</p>
+                <p className="text-base">{user.role}</p>
+                {/* <p className="text-base">status: {user.status===true ? "active" : "inactive"}</p> */}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center text-gray-500">
             No {selected} found.
           </div>
-      )}
+        )}
 
-      {/* Pagination Controls */}
-      {displayData.length > 0 && (
-        <div className="flex justify-center items-center mt-8 space-x-4">
-          <button
-            onClick={handlePrevPage}
-            disabled={currentPage === 1}
-            className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
-          >
-            Prev
-          </button>
-
-          {[...Array(totalPages)].map((_, i) => (
+        {/* Pagination Controls */}
+        {displayData.length > 0 && (
+          <div className="flex justify-center items-center mt-8 space-x-4">
             <button
-              key={i}
-              onClick={() => handlePageClick(i + 1)}
-              className={`px-3 py-1 rounded ${
-                currentPage === i + 1
-                  ? "bg-blue-700 text-white"
-                  : "bg-gray-200 dark:bg-gray-600 dark:text-white"
-              }`}
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
             >
-              {i + 1}
+              Prev
             </button>
-          ))}
 
-          <button
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                onClick={() => handlePageClick(i + 1)}
+                className={`px-3 py-1 rounded ${currentPage === i + 1
+                    ? "bg-blue-700 text-white"
+                    : "bg-gray-200 dark:bg-gray-600 dark:text-white"
+                  }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </div>
     </div>
-   </div>
   );
 };
 

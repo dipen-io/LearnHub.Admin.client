@@ -63,6 +63,7 @@ axiosInstance.interceptors.response.use(
 
             try {
                 const refreshResponse = await axios.post(`${API_URL}auth/refresh-token`,{},{withCredentials: true})
+                console.log("refreshToken :=> ", refreshResponse);
                 const newAccessToken = refreshResponse.data.accessToken;
                 authStore.setToken(newAccessToken);
                 processQueue(null, newAccessToken);
@@ -72,6 +73,7 @@ axiosInstance.interceptors.response.use(
                 return axiosInstance(originalRequest);
             }
             catch (refreshError) {
+                console.log("INDISE HERE", refreshError.response.data.error);
                 processQueue(refreshError, null);
                 isRefreshing = false;
                 // Logout if refresh fails

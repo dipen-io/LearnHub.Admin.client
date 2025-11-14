@@ -188,11 +188,12 @@ const RenderCategory = () => {
     <div className="px-4 sm:px-8 md:px-16 lg:px-24 pt-10">
 
         {/*  Search Bar */}
-        <div className='w-full text-center my-5'>
+        <div className='w-full text-center my-5 flex items-center md:gap-10 gap-4'>
+            <h1 className='items-start hover:bg-slate-300 hover:text-white hover:font-semibold hover:shadow w-52 py-2 rounded-md text-xl bg-white text-slate-400 font-semibold'> Category</h1>
             <input type="text" placeholder='search category'
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className='shadow-xl bg-white text-black w-full md:w-1/2 py-2 px-5 dark:bg-slate-100 placeholder:text-slate-400  rounded-2xl text-xl '/>
+                className='shadow-xl bg-white text-black w-full md:w-1/2 py-2 px-5 dark:bg-slate-100 placeholder:text-slate-400  rounded-md text-xl hover:bg-slate-300 '/>
         </div>
 
       {/* Category list */}
