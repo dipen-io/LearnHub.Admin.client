@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import ToggleTheme from "../hooks/toggleTheme";
-import { LayoutGrid, House, User, Play, X, LogIn, ChartNetwork } from "lucide-react";
+import { LayoutGrid, House, User, Play, X, LogIn, ChartNetwork, User2 } from "lucide-react";
 
 const SidebarComponent = ({ visible = true, onClose }) => {
   return (
@@ -21,7 +21,7 @@ const SidebarComponent = ({ visible = true, onClose }) => {
           onClick={onClose}
           className="absolute right-5 top-4 md:hidden text-xl"
         >
-          <X size={25}/>
+          <X size={25} />
         </button>
       </h1>
 
@@ -32,8 +32,7 @@ const SidebarComponent = ({ visible = true, onClose }) => {
         <NavLink
           to="/"
           className={({ isActive }) =>
-            `flex gap-3 px-5 py-2 transition ${
-              isActive ? "bg-amber-100 font-semibold" : "hover:bg-amber-100"
+            `flex gap-3 px-5 py-2 transition ${isActive ? "bg-amber-100 font-semibold" : "hover:bg-amber-100"
             }`
           }
         >
@@ -44,8 +43,7 @@ const SidebarComponent = ({ visible = true, onClose }) => {
         <NavLink
           to="/instructor"
           className={({ isActive }) =>
-            `flex gap-3 px-5 py-2  transition ${
-              isActive ? "bg-amber-100 font-semibold" : "hover:bg-amber-100"
+            `flex gap-3 px-5 py-2  transition ${isActive ? "bg-amber-100 font-semibold" : "hover:bg-amber-100"
             }`
           }
         >
@@ -56,8 +54,7 @@ const SidebarComponent = ({ visible = true, onClose }) => {
         <NavLink
           to="/course"
           className={({ isActive }) =>
-            `flex gap-3 px-5 py-2 transition ${
-              isActive ? "bg-amber-100 font-semibold" : "hover:bg-amber-100"
+            `flex gap-3 px-5 py-2 transition ${isActive ? "bg-amber-100 font-semibold" : "hover:bg-amber-100"
             }`
           }
         >
@@ -66,26 +63,38 @@ const SidebarComponent = ({ visible = true, onClose }) => {
         </NavLink>
 
         <NavLink
-          to="/category"
+          to="/approve-instructor"
           className={({ isActive }) =>
-            `flex gap-3 px-5 py-2 transition ${
-              isActive ? "bg-amber-100 font-semibold" : "hover:bg-amber-100"
+            `flex gap-3 px-5 py-2 transition ${isActive ? "bg-amber-100 font-semibold" : "hover:bg-amber-100"
             }`
           }
         >
-        <LayoutGrid />
+          <User2 />
+          Approve-instructor
+        </NavLink>
+
+        <NavLink
+          to="/category"
+          className={({ isActive }) =>
+            `flex gap-3 px-5 py-2 transition ${isActive ? "bg-amber-100 font-semibold" : "hover:bg-amber-100"
+            }`
+          }
+        >
+          <LayoutGrid />
           category
         </NavLink>
         <NavLink
           to="/login"
           className={({ isActive }) =>
-            `flex gap-3 px-5 py-2 transition ${
-              isActive ? "bg-amber-100 font-semibold" : "hover:bg-amber-100"
+            `flex gap-3 px-5 py-2 transition ${isActive ? "bg-amber-100 font-semibold" : "hover:bg-amber-100"
             }`
           }
         >
+
+
+
           <LogIn />
-         Login
+          Login
         </NavLink>
       </nav>
 

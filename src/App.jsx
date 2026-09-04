@@ -8,18 +8,19 @@ import { TextAlignJustify } from "lucide-react";
 import LoginPage from "./pages/Login";
 import CategoryPage from "./pages/Category";
 import SingleCategory from "./pages/SingleCategory";
+import ApproveInstructor from "./pages/ApproveInstructor";
 
 function App() {
   const [showSidebar, setShowSidber] = useState(true);
 
   return (
-   <>
-    <Router>
-     <div className="flex bg-theme text-theme relative">
-     {/* Sidebar */}
-     <SidebarComponent visible={showSidebar} onClose={() => setShowSidber(false)}/>
+    <>
+      <Router>
+        <div className="flex bg-theme text-theme relative">
+          {/* Sidebar */}
+          <SidebarComponent visible={showSidebar} onClose={() => setShowSidber(false)} />
 
-       {/* Hamburger menu for mobile */}
+          {/* Hamburger menu for mobile */}
           {!showSidebar && (
             <button
               className="md:hidden text-2xl mb-4 absolute left-4 top-4"
@@ -28,17 +29,18 @@ function App() {
               <TextAlignJustify />
             </button>
           )}
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/Instructor" element={<InstructorPage />} />
-        <Route path="/Course" element={<CoursePage />} />
-        <Route path="/Login" element={<LoginPage />} />
-        <Route path="/category" element={<CategoryPage />} />
-        <Route path="/category/:id" element={<SingleCategory />} />
-      </Routes>
-     </div>
-    </Router>
-   </>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/Instructor" element={<InstructorPage />} />
+            <Route path="/Course" element={<CoursePage />} />
+            <Route path="/Login" element={<LoginPage />} />
+            <Route path="/category" element={<CategoryPage />} />
+            <Route path="/category/:id" element={<SingleCategory />} />
+            <Route path="/approve-instructor" element={<ApproveInstructor />} />
+          </Routes>
+        </div>
+      </Router>
+    </>
   );
 }
 
