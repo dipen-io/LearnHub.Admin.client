@@ -99,6 +99,6 @@ export const fetchAllInstructors = async () => {
 
 // APPROVE INSTRUCTOR STATUS
 export const approveStatus = async (instructorId, status) => {
-    const { data } = await axiosInstance.patch(`admin/approve-status/${instructorId}`, status);
+    const { data } = await axiosInstance.patch(`admin/approve-instructor/${instructorId}`, { status });
     return data;
 }
